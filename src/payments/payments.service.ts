@@ -29,24 +29,24 @@ export class PaymentsService {
             },
             line_items:lineItems,
             mode:'payment',
-            success_url: 'http://localhost:3000/payments/success',
-            cancel_url: 'http://localhost:3000/payments/cancel'
+            success_url: envs.stripeSuccessUrl,
+            cancel_url: envs.stripeCancelUrl
         });
         return session;
     }
-    
+
     async getWebhook(request: Request, response:Response) {
         const signature = request.headers['stripe-signature'];
         if (!signature) {
             return response.status(400).send('⚠️  Missing Stripe signature header.');
         }
         let event: Stripe.Event;
-        const endpointSecret = 'whsec_uILQpYdN3nPVVgShiz6V3o92wWRmdt45';
+        
         try {
             event = this.stripe.webhooks.constructEvent(
                 request['rawBody'],
                 signature,
-                endpointSecret
+                envs.stripeEndpointSecret
             );
         } catch (err) {
             return response.status(400).send(`⚠️  Webhook signature verification failed.`);
